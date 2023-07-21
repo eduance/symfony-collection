@@ -18,58 +18,27 @@
 
 ;
 (function ($) {
-
     $.fn.collection = function (options) {
 
-        var defaults = {
+        const settings = {
             container: 'body',
-            allow_up: true,
-            up: '<a href="#">&#x25B2;</a>',
-            before_up: function (collection, element) {
-                return true;
-            },
-            after_up: function (collection, element) {
-                return true;
-            },
-            allow_down: true,
-            down: '<a href="#">&#x25BC;</a>',
-            before_down: function (collection, element) {
-                return true;
-            },
-            after_down: function (collection, element) {
-                return true;
-            },
-            allow_add: true,
-            add: '<a href="#">[ + ]</a>',
-            before_add: function (collection, element) {
-                return true;
-            },
-            after_add: function (collection, element) {
-                return true;
-            },
-            allow_remove: true,
-            remove: '<a href="#">[ - ]</a>',
-            before_remove: function (collection, element) {
-                return true;
-            },
-            after_remove: function (collection, element) {
-                return true;
-            },
-            allow_duplicate: false,
-            duplicate: '<a href="#">[ # ]</a>',
-            before_duplicate: function (collection, element) {
-                return true;
-            },
-            after_duplicate: function (collection, element) {
-                return true;
-            },
-            before_init: function (collection) {
-            },
-            after_init: function (collection) {
-            },
             min: 0,
             max: 100,
+
+            allow_up: true,
+            allow_down: true,
+            allow_add: true,
+            allow_remove: true,
+            allow_duplicate: false,
             add_at_the_end: false,
+
+            custom_add_location: false,
+            action_container_tag: 'div',
+            fade_in: true,
+            fade_out: true,
+            position_field_selector: null,
+            preserve_names: false,
+
             prefix: 'collection',
             prototype_name: '__name__',
             name_prefix: null,
@@ -82,41 +51,72 @@
             drag_drop_options: {
                 'placeholder': 'ui-state-highlight'
             },
-            drag_drop_start: function (event, ui) {
+
+            up: '<a href="#">&#x25B2;</a>',
+            down: '<a href="#">&#x25BC;</a>',
+            add: '<a href="#">[ + ]</a>',
+            remove: '<a href="#">[ - ]</a>',
+            duplicate: '<a href="#">[ # ]</a>',
+
+            before_down: (collection, element) => {
                 return true;
             },
-            drag_drop_update: function (event, ui) {
+            before_up: (collection, element) => {
                 return true;
             },
-            custom_add_location: false,
-            action_container_tag: 'div',
-            fade_in: true,
-            fade_out: true,
-            position_field_selector: null,
-            preserve_names: false
-        };
+            before_remove: (collection, element) => {
+                return true;
+            },
+            before_duplicate: (collection, element) => {
+                return true;
+            },
+            before_add: (collection, element) => {
+                return true;
+            },
+            after_up: (collection, element) => {
+                return true;
+            },
+            after_add: (collection, element) =>{
+                return true;
+            },
+            after_remove: (collection, element) =>{
+                return true;
+            },
+            after_duplicate: (collection, element) =>{
+                return true;
+            },
+            before_init: collection => {
+            },
+            after_init: collection => {
+            },
+            drag_drop_start: (event, ui) => {
+                return true;
+            },
+            drag_drop_update: (event, ui) => {
+                return true;
+            },
+        }
 
         // used to generate random id attributes when required and missing
-        var randomNumber = function () {
-            var rand = '' + Math.random() * 1000 * new Date().getTime();
-            return rand.replace('.', '').split('').sort(function () {
-                return 0.5 - Math.random();
-            }).join('');
-        };
+        let randomNumber = self.crypto.randomUUID();
 
         // return an element's id, after generating one when missing
-        var getOrCreateId = function (prefix, obj) {
-            if (!obj.attr('id')) {
-                var generated_id;
+        let getOrCreateId = function (prefix, obj) {
+            if (! obj.attr('id')) {
+                let generated_id;
+
                 do {
                     generated_id = prefix + '_' + randomNumber();
                 } while ($('#' + generated_id).length > 0);
                 obj.attr('id', generated_id);
+
             }
+
             return obj.attr('id');
         };
 
         // return a field value whatever the field type
+
         var getFieldValue = function (selector) {
             try {
                 var jqElem = $(selector);
@@ -137,6 +137,7 @@
         };
 
         // set a field value in accordance to the field type
+
         var putFieldValue = function (selector, value, physical) {
             try {
                 var jqElem = $(selector);
